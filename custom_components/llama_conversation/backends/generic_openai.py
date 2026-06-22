@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import json
 import logging
 from typing import List, Dict, Tuple, AsyncGenerator, Any, Optional
 
@@ -27,6 +28,7 @@ from custom_components.llama_conversation.const import (
     CONF_ENABLE_LEGACY_TOOL_CALLING,
     CONF_TOOL_RESPONSE_AS_STRING,
     CONF_RESPONSE_JSON_SCHEMA,
+    CONF_EXTRA_REQUEST_PARAMS,
     CONF_USE_SERVER_SAMPLING_DEFAULTS,
     DEFAULT_MAX_TOKENS,
     DEFAULT_TEMPERATURE,
@@ -257,6 +259,18 @@ class GenericOpenAIAPIClient(LocalLLMClient):
     def _chat_completion_params(self, entity_options: dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
         request_params = {}
         endpoint = "/chat/completions"
+
+        extra_request_params = entity_options.get(CONF_EXTRA_REQUEST_PARAMS)
+        if extra_request_params:
+            try:
+                parsed = json.loads(extra_request_params) if isinstance(extra_request_params, str) else extra_request_params
+                if isinstance(parsed, dict):
+                    request_params.update(parsed)
+                else:
+                    _LOGGER.warning("'%s' must be a JSON object, ignoring", CONF_EXTRA_REQUEST_PARAMS)
+            except (json.JSONDecodeError, TypeError) as ex:
+                _LOGGER.warning("Failed to parse '%s' as JSON, ignoring: %s", CONF_EXTRA_REQUEST_PARAMS, ex)
+
         return endpoint, request_params
 
 

@@ -16,6 +16,7 @@ from custom_components.llama_conversation.backends.generic_openai import Generic
 from custom_components.llama_conversation.const import (
     CONF_API_KEY,
     CONF_CHAT_MODEL,
+    CONF_EXTRA_REQUEST_PARAMS,
     CONF_CONTEXT_LENGTH,
     CONF_LLAMACPP_BATCH_SIZE,
     CONF_LLAMACPP_BATCH_THREAD_COUNT,
@@ -180,6 +181,31 @@ def test_generic_openai_name_and_path(hass_defaults):
     )
     assert "Generic OpenAI" in name
     assert "localhost" in name
+
+
+def test_generic_openai_extra_request_params(hass_defaults):
+    client = GenericOpenAIAPIClient(
+        hass_defaults,
+        {
+            CONF_HOST: "localhost",
+            CONF_PORT: "8080",
+            CONF_SSL: False,
+            CONF_API_PATH: "v1",
+            CONF_CHAT_MODEL: "demo",
+        },
+    )
+
+    _, params = client._chat_completion_params({CONF_EXTRA_REQUEST_PARAMS: '{"reasoning_effort": "none"}'})
+    assert params.get("reasoning_effort") == "none"
+
+    _, params = client._chat_completion_params({CONF_EXTRA_REQUEST_PARAMS: "not json"})
+    assert params == {}
+
+    _, params = client._chat_completion_params({CONF_EXTRA_REQUEST_PARAMS: "[1, 2]"})
+    assert params == {}
+
+    _, params = client._chat_completion_params({})
+    assert params == {}
 
 
 def test_normalize_path_helper():

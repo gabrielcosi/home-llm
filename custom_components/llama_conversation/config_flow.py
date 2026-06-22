@@ -74,6 +74,7 @@ from .const import (
     CONF_TOOL_CALL_SUFFIX,
     CONF_ENABLE_LEGACY_TOOL_CALLING,
     CONF_TOOL_RESPONSE_AS_STRING,
+    CONF_EXTRA_REQUEST_PARAMS,
     CONF_LLAMACPP_ENABLE_FLASH_ATTENTION,
     CONF_USE_GBNF_GRAMMAR,
     CONF_GBNF_GRAMMAR_FILE,
@@ -127,6 +128,7 @@ from .const import (
     DEFAULT_THINKING_SUFFIX,
     DEFAULT_TOOL_CALL_PREFIX,
     DEFAULT_TOOL_CALL_SUFFIX,
+    DEFAULT_EXTRA_REQUEST_PARAMS,
     DEFAULT_ENABLE_LEGACY_TOOL_CALLING,
     DEFAULT_TOOL_RESPONSE_AS_STRING,
     DEFAULT_LLAMACPP_ENABLE_FLASH_ATTENTION,
@@ -912,6 +914,11 @@ def local_llama_config_option_schema(
                 description={"suggested_value": options.get(CONF_REQUEST_TIMEOUT)},
                 default=DEFAULT_REQUEST_TIMEOUT,
             ): NumberSelector(NumberSelectorConfig(min=5, max=900, step=1, unit_of_measurement=UnitOfTime.SECONDS, mode=NumberSelectorMode.BOX)),
+            vol.Optional(
+                CONF_EXTRA_REQUEST_PARAMS,
+                description={"suggested_value": options.get(CONF_EXTRA_REQUEST_PARAMS, DEFAULT_EXTRA_REQUEST_PARAMS)},
+                default=DEFAULT_EXTRA_REQUEST_PARAMS,
+            ): TextSelector(TextSelectorConfig(multiline=True)),
         })
     elif backend_type in BACKEND_TYPE_GENERIC_OPENAI_RESPONSES:
         del result[CONF_REMEMBER_NUM_INTERACTIONS]
